@@ -2,29 +2,36 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from pathlib import Path
 
-# ==============================
+# =====================================
 # PAGE CONFIG
-# ==============================
+# =====================================
 st.set_page_config(
     page_title="E-Commerce Delivery Analysis",
     page_icon="📦",
     layout="wide"
 )
 
-# ==============================
+# =====================================
 # LOAD DATA
-# ==============================
+# =====================================
 @st.cache_data
 def load_data():
-    df = pd.read_csv("final_dataset.csv")
+
+    BASE_DIR = Path(__file__).resolve().parent
+    DATA_PATH = BASE_DIR / "final_dataset.csv"
+
+    df = pd.read_csv(DATA_PATH)
+
     return df
+
 
 df = load_data()
 
-# ==============================
+# =====================================
 # SIDEBAR
-# ==============================
+# =====================================
 with st.sidebar:
 
     st.title("Profil Analis")
@@ -43,9 +50,9 @@ with st.sidebar:
         """
     )
 
-# ==============================
+# =====================================
 # HEADER
-# ==============================
+# =====================================
 st.title("📦 E-Commerce Delivery Analysis Dashboard")
 
 st.write(
@@ -56,9 +63,9 @@ pada transaksi e-commerce.
 """
 )
 
-# ==============================
-# KPI
-# ==============================
+# =====================================
+# KPI METRICS
+# =====================================
 col1, col2, col3 = st.columns(3)
 
 col1.metric(
@@ -67,34 +74,34 @@ col1.metric(
 )
 
 col2.metric(
-    "Rata-rata Delivery Time",
+    "Average Delivery Time",
     f"{df['delivery_time'].mean():.1f} hari"
 )
 
 col3.metric(
-    "Rata-rata Freight Cost",
+    "Average Freight Cost",
     f"{df['freight_value'].mean():.2f}"
 )
 
 st.divider()
 
-# ==============================
+# =====================================
 # TABS
-# ==============================
+# =====================================
 tab1, tab2, tab3 = st.tabs([
     "Dimensi Produk",
     "Biaya Pengiriman",
     "Clustering Analysis"
 ])
 
-# ==============================
+# =====================================
 # TAB 1 : DIMENSI PRODUK
-# ==============================
+# =====================================
 with tab1:
 
     st.subheader("Pengaruh Dimensi Produk terhadap Waktu Pengiriman")
 
-    fig, axes = plt.subplots(2, 2, figsize=(12,8))
+    fig, axes = plt.subplots(2,2, figsize=(12,8))
 
     sns.scatterplot(
         x="product_weight_g",
@@ -136,9 +143,9 @@ with tab1:
 
     st.pyplot(fig)
 
-# ==============================
+# =====================================
 # TAB 2 : BIAYA PENGIRIMAN
-# ==============================
+# =====================================
 with tab2:
 
     st.subheader("Pengaruh Biaya Pengiriman terhadap Waktu Pengiriman")
@@ -159,16 +166,15 @@ with tab2:
 
     st.pyplot(fig)
 
-# ==============================
+# =====================================
 # TAB 3 : CLUSTERING
-# ==============================
+# =====================================
 with tab3:
 
     st.subheader("Clustering Analysis")
 
     colA, colB = st.columns(2)
 
-    # Freight Cluster
     with colA:
 
         st.write("Average Delivery Time by Freight Cluster")
@@ -186,7 +192,6 @@ with tab3:
 
         st.pyplot(fig)
 
-    # Volume Cluster
     with colB:
 
         st.write("Average Delivery Time by Volume Cluster")
@@ -204,17 +209,17 @@ with tab3:
 
         st.pyplot(fig)
 
-# ==============================
+# =====================================
 # DATA PREVIEW
-# ==============================
+# =====================================
 st.divider()
 
 st.subheader("Dataset Preview")
 
 st.dataframe(df.head(50))
 
-# ==============================
+# =====================================
 # FOOTER
-# ==============================
+# =====================================
 st.markdown("---")
 st.caption("Proyek Analisis Data - Dicoding")
