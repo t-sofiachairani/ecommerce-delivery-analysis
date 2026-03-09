@@ -1,4 +1,4 @@
-# bike-sharing
+# E-Commerce Delivery Analysis
 
 
 Analisis dataset transaksi e-commerce untuk memahami pengaruh **dimensi produk** dan **biaya pengiriman** terhadap **waktu pengiriman** menggunakan Python (Pandas, Seaborn) dan visualisasi interaktif dengan **Streamlit Dashboard**.
