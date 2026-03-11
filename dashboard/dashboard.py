@@ -30,7 +30,7 @@ def load_data():
 df = load_data()
 
 # =====================================
-# SIDEBAR
+# SIDEBAR FILTER
 # =====================================
 with st.sidebar:
 
@@ -42,13 +42,53 @@ with st.sidebar:
 
     st.markdown("---")
 
-    st.write(
-        """
-        Dashboard ini menampilkan analisis pengaruh dimensi produk
-        dan biaya pengiriman terhadap waktu pengiriman
-        pada transaksi e-commerce periode 2017-2018.
-        """
+    st.subheader("Filter Data")
+
+    # Filter Freight Cluster
+    freight_filter = st.multiselect(
+        "Freight Cluster",
+        options=df["freight_cluster"].unique(),
+        default=df["freight_cluster"].unique()
     )
+
+    # Filter Volume Cluster
+    volume_filter = st.multiselect(
+        "Volume Cluster",
+        options=df["volume_cluster"].unique(),
+        default=df["volume_cluster"].unique()
+    )
+
+    # Slider Freight Value
+    freight_range = st.slider(
+        "Rentang Freight Value",
+        int(df["freight_value"].min()),
+        int(df["freight_value"].max()),
+        (
+            int(df["freight_value"].min()),
+            int(df["freight_value"].max())
+        )
+    )
+
+    # Slider Product Weight
+    weight_range = st.slider(
+        "Rentang Berat Produk (gram)",
+        int(df["product_weight_g"].min()),
+        int(df["product_weight_g"].max()),
+        (
+            int(df["product_weight_g"].min()),
+            int(df["product_weight_g"].max())
+        )
+    )
+
+# =====================================
+# APPLY FILTER
+# =====================================
+filtered_df = df[
+    (df["freight_cluster"].isin(freight_filter)) &
+    (df["volume_cluster"].isin(volume_filter)) &
+    (df["freight_value"].between(freight_range[0], freight_range[1])) &
+    (df["product_weight_g"].between(weight_range[0], weight_range[1]))
+]
 
 # =====================================
 # HEADER
@@ -70,17 +110,17 @@ col1, col2, col3 = st.columns(3)
 
 col1.metric(
     "Total Transaksi",
-    f"{len(df):,}"
+    f"{len(filtered_df):,}"
 )
 
 col2.metric(
     "Average Delivery Time",
-    f"{df['delivery_time'].mean():.1f} hari"
+    f"{filtered_df['delivery_time'].mean():.1f} hari"
 )
 
 col3.metric(
     "Average Freight Cost",
-    f"{df['freight_value'].mean():.2f}"
+    f"{filtered_df['freight_value'].mean():.2f}"
 )
 
 st.divider()
@@ -95,7 +135,7 @@ tab1, tab2, tab3 = st.tabs([
 ])
 
 # =====================================
-# TAB 1 : DIMENSI PRODUK
+# TAB 1
 # =====================================
 with tab1:
 
@@ -106,7 +146,7 @@ with tab1:
     sns.scatterplot(
         x="product_weight_g",
         y="delivery_time",
-        data=df,
+        data=filtered_df,
         alpha=0.3,
         ax=axes[0,0]
     )
@@ -115,7 +155,7 @@ with tab1:
     sns.scatterplot(
         x="product_length_cm",
         y="delivery_time",
-        data=df,
+        data=filtered_df,
         alpha=0.3,
         ax=axes[0,1]
     )
@@ -124,7 +164,7 @@ with tab1:
     sns.scatterplot(
         x="product_height_cm",
         y="delivery_time",
-        data=df,
+        data=filtered_df,
         alpha=0.3,
         ax=axes[1,0]
     )
@@ -133,7 +173,7 @@ with tab1:
     sns.scatterplot(
         x="product_width_cm",
         y="delivery_time",
-        data=df,
+        data=filtered_df,
         alpha=0.3,
         ax=axes[1,1]
     )
@@ -144,7 +184,7 @@ with tab1:
     st.pyplot(fig)
 
 # =====================================
-# TAB 2 : BIAYA PENGIRIMAN
+# TAB 2
 # =====================================
 with tab2:
 
@@ -155,19 +195,18 @@ with tab2:
     sns.scatterplot(
         x="freight_value",
         y="delivery_time",
-        data=df,
+        data=filtered_df,
         alpha=0.3,
         ax=ax
     )
 
     ax.set_xlabel("Freight Value")
     ax.set_ylabel("Delivery Time (days)")
-    ax.set_title("Freight Value vs Delivery Time")
 
     st.pyplot(fig)
 
 # =====================================
-# TAB 3 : CLUSTERING
+# TAB 3
 # =====================================
 with tab3:
 
@@ -179,16 +218,10 @@ with tab3:
 
         st.write("Average Delivery Time by Freight Cluster")
 
-        freight_avg = df.groupby("freight_cluster")["delivery_time"].mean()
+        freight_avg = filtered_df.groupby("freight_cluster")["delivery_time"].mean()
 
         fig, ax = plt.subplots()
-
-        freight_avg.plot(
-            kind="bar",
-            ax=ax
-        )
-
-        ax.set_ylabel("Average Delivery Time")
+        freight_avg.plot(kind="bar", ax=ax)
 
         st.pyplot(fig)
 
@@ -196,16 +229,10 @@ with tab3:
 
         st.write("Average Delivery Time by Volume Cluster")
 
-        volume_avg = df.groupby("volume_cluster")["delivery_time"].mean()
+        volume_avg = filtered_df.groupby("volume_cluster")["delivery_time"].mean()
 
         fig, ax = plt.subplots()
-
-        volume_avg.plot(
-            kind="bar",
-            ax=ax
-        )
-
-        ax.set_ylabel("Average Delivery Time")
+        volume_avg.plot(kind="bar", ax=ax)
 
         st.pyplot(fig)
 
@@ -216,10 +243,4 @@ st.divider()
 
 st.subheader("Dataset Preview")
 
-st.dataframe(df.head(50))
-
-# =====================================
-# FOOTER
-# =====================================
-st.markdown("---")
-st.caption("Proyek Analisis Data - Dicoding")
+st.dataframe(filtered_df.head(50))
